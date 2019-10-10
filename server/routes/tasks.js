@@ -27,17 +27,15 @@ router.post('/add', authenticate, async (req, res) => {
     });
 })
 
-
 router.get('/all', authenticate, async (req, res) => {
     // FIND ALL TASKS
-    Task.find({}, (error, tasks) => {
+    const { userId } = req.session;
+    Task.find({ _id: userId }, (error, tasks) => {
         if (error) {
             return res.status(500).json();
         }
         return res.status(200).json({ tasks: tasks });
     })
-    // .populate('author', 'username', 'user');
-    // Populate will find the author that created the task and add it to the task (username only)
 })
 
 

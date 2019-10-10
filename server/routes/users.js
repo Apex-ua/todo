@@ -25,8 +25,11 @@ const isEmail = (email) => {
 }
 
 router.post('/register', async (req, res) => {
+    if(req) {
+        console.log(req.body);
+    }
     try {
-        const {email, password } = req.body;
+        const { email, password } = req.body;
         if (!isEmail(email)) {
             throw new Error('Email must be a valid email adress.');
         }
@@ -149,21 +152,21 @@ router.get('/me', authenticate, async (req, res) => {
 module.exports = router;
 
 
-export function create(req, res) {
-    const id = auth.getUserId(req);
-    User.findOne({ _id: id }, (error, user) => {
-        if (error && !user) {
-            return res.status(500).json();
-        }
-        const task = new Task(req.body.task);
-        task.author = user._id;
-        task.dueDate = moment(task.dueDate);
+// export function create(req, res) {
+//     const id = auth.getUserId(req);
+//     User.findOne({ _id: id }, (error, user) => {
+//         if (error && !user) {
+//             return res.status(500).json();
+//         }
+//         const task = new Task(req.body.task);
+//         task.author = user._id;
+//         task.dueDate = moment(task.dueDate);
 
-        task.save(error => {
-            if (error) {
-                return res.status(500).json();
-            }
-            return res.status(201).json();
-        });
-    });
-}
+//         task.save(error => {
+//             if (error) {
+//                 return res.status(500).json();
+//             }
+//             return res.status(201).json();
+//         });
+//     });
+// }
