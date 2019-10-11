@@ -68,24 +68,20 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!isEmail(email)) {
-            return res.status(400).json({
-                errors: [
-                    {
-                        title: 'Dad request',
-                        detail: 'Email must be a valid email adress'
-                    },
-                ],
-            });
+            return res.status(400).json(
+                {
+                    title: 'Bad request',
+                    detail: 'Email must be a valid email adress'
+                }
+            );
         }
         if (typeof password !== 'string') {
-            return res.status(400).json({
-                errors: [
-                    {
-                        title: 'Bad request',
-                        details: 'Password must be a string'
-                    },
-                ],
-            })
+            return res.status(400).json(
+                {
+                    title: 'Bad request',
+                    details: 'Password must be a string'
+                }
+            )
         }
         
         const user = await User.findOne({ email });
@@ -113,15 +109,12 @@ router.post('/login', async (req, res) => {
         });
 
     } catch (err) {
-        res.status(401).json({
-            errors: [
+        res.status(401).json(
                 {
                     title: 'Invalid Credentials',
                     detail: 'Check email and password combination',
                     errorMessage: err.message,
-                }
-            ]
-        })
+                })
     }
 });
 

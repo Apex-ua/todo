@@ -1,16 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <link rel="stylesheet" href="./styles.css">
 </head>
+
 <body>
-    <h1>Registration</h1>
-    <div id="userBar"></div>
-    <div id="loginBar"></div>
-    <div id="app"></div>
-    <script src="script.js"></script>
+    
+    <!-- <div id="loginBar"></div>
+    <div id="app"></div> -->
+
+    <!-- Trigger/Open The Modal -->
+    <header>
+        <button id="registerButton">Registration</button>
+        <button id="loginButton">Login</button>
+    </header>
+    <main>
+        <section></section>
+        <button id="createTaskButton">Add new task</button>
+        <section id="tasksContainer" class="tasksContainer"> 
+        </section>
+    </main>
+    <div id="globalStatus"></div>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+
+    </div>
+    <script src="./scripts/script.js"></script>
+    <!-- <script src="./scripts/modal.js"></script> -->
 </body>
+
 </html>
