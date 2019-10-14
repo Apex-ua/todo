@@ -51,7 +51,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 app.use('/api/users', usersRoute);
-app.use('/api/tasks', tasksRoute);
+app.use('/api/task', tasksRoute);
 
 
 app.listen(port, () => {

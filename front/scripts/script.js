@@ -170,7 +170,7 @@ function clear(container) {
 
 
 function getTasks() {
-    fetch("/api/tasks/all", {
+    fetch("/api/task/all", {
             headers: {
                 "Content-type": "application/json"
             },
@@ -182,6 +182,7 @@ function getTasks() {
             data.tasks.forEach(task => {
                 createTaskCard(task, tasksContainer);
             });
+            addListenerToTaskCard();
         })
         .catch(err => {
             return console.log(err);
@@ -209,7 +210,7 @@ loginButton.onclick = function () {
 
 createTaskButton.onclick = function () {
     modal.style.display = "block";
-    createTaskInputs(modalContent);
+    createTaskInputs(modalContent, 'Create new task');
 }
 
 // When the user clicks on <span> (x), close the modal
@@ -264,10 +265,17 @@ function createTaskCard(task, container) {
     } else {
         status.innerText = `Done: ${task.completed}`;
     }
+    const editTaskButton = document.createElement('input');
+    editTaskButton.setAttribute("type", "button");
+    editTaskButton.setAttribute("class", "editTaskButton");
+    editTaskButton.setAttribute("id", `edit_${task._id}`);
+    editTaskButton.setAttribute("value", "Edit");
+    // editTaskButton.onclick = newTaskRequest;
 
     wrapper.appendChild(title);
     wrapper.appendChild(body);
     wrapper.appendChild(status);
+    wrapper.appendChild(editTaskButton);
     container.appendChild(wrapper);
 }
 
@@ -279,11 +287,11 @@ window.onload = function () {
     }
 }
 
-function createTaskInputs(parent) {
+function createTaskInputs(parent, heading) {
     const wrapper = document.createElement('div');
     wrapper.setAttribute("class", "create-task-inputs");
     const header = document.createElement('h3');
-    header.innerText = 'Add new task';
+    header.innerText = heading;
     const taskTitleInput = document.createElement('input');
     taskTitleInput.setAttribute("type", "text");
     taskTitleInput.setAttribute("id", "taskTitleInput");
@@ -306,6 +314,39 @@ function createTaskInputs(parent) {
     parent.appendChild(wrapper);
 }
 
+function editTaskInputs(parent, task) {
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute("class", "edit-task-inputs");
+    const header = document.createElement('h3');
+    header.innerText = 'Edit task';
+    const taskTitleInput = document.createElement('input');
+    taskTitleInput.setAttribute("type", "text");
+    taskTitleInput.setAttribute("id", "taskTitleInput");
+    taskTitleInput.setAttribute("class", "edit-task-input");
+    taskTitleInput.value = task.title;
+    const taskBodyInput = document.createElement('input');
+    taskBodyInput.setAttribute("type", "text");
+    taskBodyInput.setAttribute("id", "taskBodyInput");
+    taskBodyInput.setAttribute("class", "edit-task-input");
+    taskBodyInput.value = task.body;
+    const editTaskButton = document.createElement('input');
+    editTaskButton.setAttribute("type", "button");
+    editTaskButton.setAttribute("id", `save_${task._id}`);
+    editTaskButton.setAttribute("value", "Save");
+    editTaskButton.onclick = saveEditedTask;
+    const deleteTaskButton = document.createElement('input');
+    deleteTaskButton.setAttribute("type", "button");
+    deleteTaskButton.setAttribute("id", `delete_${task._id}`);
+    deleteTaskButton.setAttribute("value", "Delete");
+    deleteTaskButton.onclick = deleteEditedTask;
+    wrapper.appendChild(header);
+    wrapper.appendChild(taskTitleInput);
+    wrapper.appendChild(taskBodyInput);
+    wrapper.appendChild(editTaskButton);
+    wrapper.appendChild(deleteTaskButton);
+    parent.appendChild(wrapper);
+}
+
 function getNewTaskValues() {
     let title = document.getElementById("taskTitleInput").value;
     let body = document.getElementById("taskBodyInput").value;
@@ -315,17 +356,21 @@ function getNewTaskValues() {
     };
 }
 
-function newTaskRequest() {
-    let { title, body } = getNewTaskValues();
 
-    let task =  {
+function newTaskRequest() {
+    let {
+        title,
+        body
+    } = getNewTaskValues();
+
+    let task = {
         "task": {
             "title": title,
             "body": body
         }
     };
 
-    fetch("/api/tasks/create", {
+    fetch("/api/task/create", {
             headers: {
                 "Content-type": "application/json"
             },
@@ -342,6 +387,112 @@ function newTaskRequest() {
             }
             console.log(data);
         })
+        .catch(err => {
+            return console.log(err);
+        })
+}
+
+function addListenerToTaskCard() {
+    taskCards = document.querySelectorAll('.editTaskButton');
+    for (let i = 0; i < taskCards.length; i++) {
+        taskCards[i].addEventListener('click', editTaskPopup);
+    }
+}
+
+function editTaskPopup(e) {
+    event.stopPropagation();
+    const tempId = e.target.getAttribute('id');
+    const taskCardId = clearId(tempId, 'edit_');
+    modal.style.display = "block";
+    getTask(taskCardId);
+}
+
+function saveEditedTask(e) {
+    event.stopPropagation();
+    const tempId = e.target.getAttribute('id');
+    const taskCardId = clearId(tempId, 'save_');
+    // alert(taskCardId);
+    editTaskRequest(taskCardId);
+    clearCloseModal();
+    clear(tasksContainer);
+    alert('saved');
+    getTasks();
+}
+
+function deleteEditedTask(e) {
+    event.stopPropagation();
+    const tempId = e.target.getAttribute('id');
+    const taskCardId = clearId(tempId, 'delete_');
+    deleteTask(taskCardId);
+    clearCloseModal();
+    clear(tasksContainer);
+    alert('deleted');
+    getTasks();
+}
+
+function getTask(id) {
+    fetch(`/api/task/${id}`, {
+            headers: {
+                "Content-type": "application/json"
+            },
+            method: "get"
+        })
+        .then(res => res.json())
+        .then(data => {
+            editTaskInputs(modalContent, data.task);
+        })
+        .catch(err => {
+            return console.log(err);
+        })
+}
+
+// function editTaskRequest
+
+function clearId(prefixedId, prefixToDelete) {
+    return prefixedId.replace(prefixToDelete, '');
+}
+
+function editTaskRequest(id) {
+    let {
+        title,
+        body
+    } = getNewTaskValues();
+
+    let task = {
+        "task": {
+            "title": title,
+            "body": body,
+            "_id": id
+        }
+    };
+
+    fetch("/api/task/update", {
+            headers: {
+                "Content-type": "application/json"
+            },
+            method: "PUT",
+            body: JSON.stringify(task)
+        })
+        .then(res => res.json())
+        .catch(err => {
+            return console.log(err);
+        })
+}
+
+function clearAndRender() {
+    clearCloseModal();
+    clear(tasksContainer);
+    getTasks();
+}
+
+function deleteTask(id) {
+    fetch(`/api/task/${id}`, {
+            headers: {
+                "Content-type": "application/json"
+            },
+            method: "delete"
+        })
+        .then(res => res.json())
         .catch(err => {
             return console.log(err);
         })

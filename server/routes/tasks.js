@@ -83,5 +83,39 @@ router.post('/create', authenticate, (req, res) => {
     });
 });
 
+router.get('/:id', authenticate, async (req, res) => {
+    Task.findOne({ _id: req.params.id }, (error, task) => {
+        if (error) {
+            return res.status(500).json();
+        }
+        if (!task) {
+            return res.status(404).json();
+        }
+        return res.status(200).json({ task: task });
+    });
+});
+
+
+router.delete('/:id', authenticate, async (req, res) => {
+    const { userId } = req.session;
+    Task.findOne({ _id: req.params.id }, (error, task) => {
+        if (error) {
+            return res.status(500).json();
+        }
+        if (!task) {
+            return res.status(404).json();
+        }
+        console.log(`aadfsafsafasfsf ${task.author}`);
+        // if (task.author.toString() !== userId) {
+        //     return res.status(403).json({ message: 'Not allowed to delete another user\'s task' });
+        // }
+        Task.deleteOne({ _id: req.params.id }, error => {
+            if (error) {
+                return res.status(500).json();
+            }
+            return res.status(204).json();
+        });
+    });
+});
 
 module.exports = router;
